@@ -38,6 +38,8 @@ int main(int argc, char *argv[]){
     for(i=0, v=firstElement+2; i<=arraySize; i++, v++){
         myArray[i] = v;
     }
+    printf("%d",rank);
+    printArray(myArray,sizeof(myArray));
 
     //Start crossing multiples of primes until halfway
     k = 2;
@@ -63,12 +65,13 @@ int main(int argc, char *argv[]){
     }
 
     //printing all non-crossed number into text file
-   for(int x = 0; x<=size;x++){
-       for(int y = 0; y<=tmpArray[x].size(); y++){
-           if(tmpArray[x][y] != -1){
-               char *output = itoa(tmpArray[x][y]);
-               strncat(output, " ");
-               fputs(output,fp);
+    for(int x = 0; x<=size;x++){
+	for(int y = 0; y<=sizeof(tmpArray[x]); y++){
+		 if(tmpArray[x][y] != -1){
+			 char output[10]={0};
+			sprintf(output, "%d");
+			fputs(output,fp);
+			
                 }
             }
         }
