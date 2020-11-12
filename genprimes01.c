@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]){
     long timeCPU;
-    int rank, size, k, i, v, n, scatterSize,remainder;
+    int rank, size, k, i, v, n,remainder;
     int **tmpArray, *myArray, firstElement, lastElement, arraySize;
     FILE *fp;
 
@@ -15,7 +15,10 @@ int main(int argc, char *argv[]){
     char* text = ".txt";
     strncat(filename,text,4);
     fp = fopen(filename,"w");
-    char N = atoi(argv[1]);
+    int N = atoi(argv[1]);
+	
+    int A[N];
+    for(i=0;i<N;i++){A[i] = i+2;}
 
     //start parallel part
     MPI_Init(&argc,&argv);
@@ -23,24 +26,26 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     //setting up sizes of each of the cores' arrays and filling them with numbers 2-N
-    remainder = N-1%size;
-    arraySize = N-1/size;
-    if (rank < remainder){
-        firstElement = rank * (arraySize + 1);
-        lastElement = firstElement + arraySize;
-    } else {
-        firstElement = rank * arraySize + remainder;
-        lastElement = firstElement + (arraySize - 1);
-
+    remainder = (N-1)%size;
+    int localCounts[size],offsets[size];
+    int sum = 0;
+    for(int i =0; i<size;i++){
+	    localCounts[i] = (N-1)/size;
+	    if(remainder>0){
+		    localCounts[i]+=1;
+		    remainder--;
+	    }
+	    offset[i] = sum;
+	    sum+=localCounts[i];
     }
-    //creation of original array from 2 to N
-    myArray = (int*) (malloc((arraySize)*sizeof(int)));
-    for(i=0, v=firstElement+2; i<=arraySize; i++, v++){
-        myArray[i] = v;
+	
+    int *myArray = (int *)malloc(localCounts[rank]*sizeof(int));
+    if(rank == 0){
+	for(int i = 0; i<size;i++){
+		MPI_Send(&A[i*localCounts[i],localCounts[i],MPI_INT, i,1234,MPI_COMM_WORLD);
     }
-    printf("%d",rank);
-    printArray(myArray,sizeof(myArray));
-
+    MPI_Recv(myArray,localCount[rank],MPI_INT,0,1234,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+			    
     //Start crossing multiples of primes until halfway
     k = 2;
     while(k*k <=N){
@@ -52,7 +57,7 @@ int main(int argc, char *argv[]){
     //all processes send their arrays to process 0
     MPI_Send(myArray, arraySize, MPI_INT, 0, 50, MPI_COMM_WORLD);
 
-
+	//rank 0 picks them up and stores in 2D array
     if (rank == 0){
         //set up a 2D array for recieving
         tmpArray = (int**) (malloc(size*sizeof(int)));
@@ -68,7 +73,7 @@ int main(int argc, char *argv[]){
     for(int x = 0; x<=size;x++){
 	for(int y = 0; y<=sizeof(tmpArray[x]); y++){
 		 if(tmpArray[x][y] != -1){
-			 char output[10]={0};
+			char output[10]={0};
 			sprintf(output, "%d");
 			fputs(output,fp);
 			
