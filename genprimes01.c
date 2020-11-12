@@ -19,6 +19,7 @@ int main(int argc, char *argv[]){
 	
     int A[N];
     for(i=0;i<N;i++){A[i] = i+2;}
+    printArray(&A,N);
 
     //start parallel part
     MPI_Init(&argc,&argv);
