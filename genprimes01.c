@@ -8,7 +8,7 @@
 int main(int argc, char *argv[]){
     long timeCPU;
     int rank, size, k, i, v, n,remainder;
-    int **tmpArray, *myArray, firstElement, lastElement, arraySize;
+    int **tmpArray, firstElement, lastElement, arraySize;
     FILE *fp;
 
     char filename = argv[1];
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 
     //setting up sizes of each of the cores' arrays and filling them with numbers 2-N
     remainder = (N-1)%size;
-    int localCounts[size],offsets[size];
+    int localCounts[size],offset[size];
     int sum = 0;
     for(int i =0; i<size;i++){
 	    localCounts[i] = (N-1)/size;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
     int *myArray = (int *)malloc(localCounts[rank]*sizeof(int));
     if(rank == 0){
 	for(int i = 0; i<size;i++){
-		MPI_Send(&A[i*localCounts[i],localCounts[i],MPI_INT, i,1234,MPI_COMM_WORLD);
+		MPI_Send(&A[i*localCounts[i]],localCounts[i],MPI_INT, i,1234,MPI_COMM_WORLD);
     }
     MPI_Recv(myArray,localCount[rank],MPI_INT,0,1234,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 			    
