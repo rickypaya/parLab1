@@ -50,24 +50,24 @@ int main(int argc, char *argv[]){
     //Start crossing multiples of primes until halfway
     k = 2;
     while(k*k <=N){
-        markMultiples(k, myArray, lastElement-firstElement);
-        k = nextNumber(k, myArray, lastElement-firstElement);
+        markMultiples(k, myArray, localCounts[rank]);
+        k = nextNumber(k, myArray, localCounts[rank]);
         MPI_Bcast(&k, 1, MPI_INT, 0, MPI_COMM_WORLD);
     }
 
     //all processes send their arrays to process 0
-    MPI_Send(myArray, arraySize, MPI_INT, 0, 50, MPI_COMM_WORLD);
+    MPI_Send(myArray, sizeof(myArray), MPI_INT, 0, 50, MPI_COMM_WORLD);
 
 	//rank 0 picks them up and stores in 2D array
     if (rank == 0){
         //set up a 2D array for recieving
         tmpArray = (int**) (malloc(size*sizeof(int)));
         for(i=0;i<size;i++){
-            tmpArray[i] = (int*) (malloc((arraySize)*sizeof(int)));
+            tmpArray[i] = (int*) (malloc((localCounts[i])*sizeof(int)));
 
         }
     for (i=0; i<size;i++){
-        MPI_Recv(tmpArray[i], arraySize, MPI_INT, i, 50, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(tmpArray[i], localCounts[i], MPI_INT, i, 50, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
     //printing all non-crossed number into text file
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]){
 
 int nextNumber(int k, int *array, int n){
     //helper function to find the next prime
-    for(int i=0; i<=n; i++){
+    for(int i=0; i<n; i++){
         if(array[i] > k){
            return array[i];
             }
