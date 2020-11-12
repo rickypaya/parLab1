@@ -43,8 +43,9 @@ int main(int argc, char *argv[]){
     if(rank == 0){
 	for(int i = 0; i<size;i++){
 		MPI_Send(&A[i*localCounts[i]],localCounts[i],MPI_INT, i,1234,MPI_COMM_WORLD);
+	}
     }
-    MPI_Recv(myArray,localCount[rank],MPI_INT,0,1234,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    MPI_Recv(myArray,localCounts[rank],MPI_INT,0,1234,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 			    
     //Start crossing multiples of primes until halfway
     k = 2;
